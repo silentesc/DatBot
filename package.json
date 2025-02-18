@@ -10,8 +10,11 @@
     "dev": "ts-node src/main.ts"
   },
   "dependencies": {
+    "@discordjs/voice": "^0.18.0",
+    "@distube/ytdl-core": "^4.16.4",
     "discord.js": "^14.18.0",
-    "dotenv": "^16.4.7"
+    "dotenv": "^16.4.7",
+    "yt-search": "^2.12.1"
   },
   "devDependencies": {
     "@types/node": "^22.13.4",

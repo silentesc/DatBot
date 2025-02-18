@@ -27,6 +27,17 @@ const commands = [
                 ]
             }
         ]
+    },
+    {
+        name: "play",
+        description: "Plays the given music.",
+        options: [
+            {
+                name: "input",
+                description: "The url or name of the song.",
+                type: ApplicationCommandOptionType.String
+            }
+        ]
     }
 ];
 
@@ -44,6 +55,7 @@ main();
 
 
 async function deleteAllCommands(globalCommands, guildCommands) {
+    console.log(`globalCommands: ${globalCommands} guildCommands: ${guildCommands}`)
     try {
         const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
