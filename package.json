@@ -1,0 +1,21 @@
+{
+  "name": "datbot",
+  "version": "1.0.0",
+  "description": "Music bot",
+  "license": "ISC",
+  "author": "silentesc",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "dev": "ts-node src/main.ts"
+  },
+  "dependencies": {
+    "discord.js": "^14.18.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
