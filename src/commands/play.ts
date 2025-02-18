@@ -28,7 +28,11 @@ module.exports = {
             return;
         }
 
-        const { title, url, timestamp, thumbnail } = video;
+        const title = video.title;
+        const url = video.url;
+        const timestamp = video.timestamp;
+        const thumbnail = video.thumbnail;
+        const authorName = video.author.name;
 
         // Get guild, member, voice channel
         const guildId = interaction.guildId;
@@ -104,12 +108,12 @@ module.exports = {
                 stream.destroy();
             });
 
-            responseEmbed.setURL(url);
             responseEmbed.setThumbnail(thumbnail);
             responseEmbed.addFields(
                 { name: "Title", value: title, inline: false },
+                { name: "Channel", value: authorName, inline: false },
+                { name: "Duration", value: timestamp, inline: false },
                 { name: "URL", value: url, inline: false },
-                { name: "Duration", value: timestamp, inline: false }
             );
         } catch (error) {
             console.error("Error playing the audio:", error);
