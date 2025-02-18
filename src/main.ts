@@ -1,4 +1,4 @@
-import { Client, ActivityType, EmbedBuilder } from "discord.js";
+import { Client, ActivityType, EmbedBuilder, GatewayIntentBits } from "discord.js";
 import { readdirSync } from "fs";
 import "dotenv/config";
 
@@ -10,7 +10,13 @@ readdirSync("./src/commands").filter(file => file.endsWith(".ts")).forEach(fileN
     commands.set(commandName, command);
 });
 
-const client = new Client({ intents: [] });
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildVoiceStates,
+    ]
+});
 
 
 client.on("ready", c => {
@@ -23,7 +29,7 @@ client.on("ready", c => {
 
 
 client.on("interactionCreate", async interaction => {
-    if (!interaction.isChatInputCommand()) return;
+    if (!interaction.isChatInputCommand() || !interaction.guild) return;
 
     const command = commands.get(interaction.commandName);
     if (command) {
