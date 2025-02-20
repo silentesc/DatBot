@@ -1,8 +1,8 @@
 import { Client, ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
-import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } from "@discordjs/voice";
 import ytdl from "@distube/ytdl-core";
 // @ts-ignore
 import ytSearch from "yt-search";
+import { GuildPlayer } from "../utils/GuildPlayer";
 
 
 module.exports = {
@@ -72,41 +72,11 @@ module.exports = {
             return;
         }
 
-        // Join voice channel
-        const connection = joinVoiceChannel({
-            channelId: voiceChannel.id,
-            guildId: voiceChannel.guild.id,
-            adapterCreator: voiceChannel.guild.voiceAdapterCreator
-        });
-
-
         try {
-            // Stream the audio from YouTube.
             const stream = ytdl(url, { filter: "audioonly", quality: "highestaudio", highWaterMark: 1 << 25 });
-            const resource = createAudioResource(stream);
 
-            // Create an audio player.
-            const player = createAudioPlayer();
-            player.play(resource);
-            connection.subscribe(player);
-
-            // Listeners for player
-            player.on(AudioPlayerStatus.Idle, () => {
-                connection.destroy();
-                stream.destroy();
-            });
-
-            player.on('error', (error) => {
-                console.error('Error playing audio:', error);
-                connection.destroy();
-                stream.destroy();
-            });
-
-            // Listeners for connection
-            connection.on(VoiceConnectionStatus.Disconnected, () => {
-                player.stop();
-                stream.destroy();
-            });
+            const guildPlayer: GuildPlayer = GuildPlayer.getGuildPlayer(guildId);
+            guildPlayer.play(stream, voiceChannel);
 
             responseEmbed.setThumbnail(thumbnail);
             responseEmbed.addFields(
@@ -118,7 +88,6 @@ module.exports = {
         } catch (error) {
             console.error("Error playing the audio:", error);
             responseEmbed.setDescription("There was an error playing that song.");
-            connection.destroy();
         }
 
         await interaction.reply({ embeds: [responseEmbed] });
