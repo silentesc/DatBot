@@ -20,11 +20,11 @@ const client = new Client({
 
 
 client.on("ready", c => {
-    console.log(`Logged in as ${c.user.tag}`);
     client.user?.setActivity({
         name: "/help",
         type: ActivityType.Watching
     });
+    console.log(`Logged in as ${c.user.tag}`);
 });
 
 
