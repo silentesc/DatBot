@@ -5,16 +5,12 @@ import { Readable } from "stream";
 export class GuildPlayer {
     private static guildPlayers: Map<string, GuildPlayer> = new Map();
 
-    private guildId: string;
-    private prevStream: Readable | null;
-    private prevPlayer: AudioPlayer | null;
-    private prevConnection: VoiceConnection | null;
+    private stream: Readable | null;
+    private connection: VoiceConnection | null;
 
     private constructor(guildId: string) {
-        this.guildId = guildId;
-        this.prevStream = null;
-        this.prevPlayer = null;
-        this.prevConnection = null;
+        this.stream = null;
+        this.connection = null;
 
         GuildPlayer.guildPlayers.set(guildId, this);
     }
@@ -28,43 +24,37 @@ export class GuildPlayer {
     }
 
     public play(stream: Readable, voiceChannel: VoiceBasedChannel) {
-        let player: AudioPlayer | null = null;
+        console.log("play method called");
+
+        if (this.stream) {
+            console.log("Destroyed old stream");
+            this.stream.destroy();
+        }
+        this.stream = stream;
+
         let connection: VoiceConnection | null = null;
+        let reuseConnection: boolean = false;
 
-        let listenForPlayer: boolean = true;
-        let listenForConnection: boolean = true;
-
-        // Check prev variables
-        if (this.prevStream) {
-            if (!this.prevStream.destroyed) {
-                console.log("Destorying prevStream");
-                this.prevStream.destroy();
+        // Check for reusing connection
+        if (this.connection) {
+            if (this.connection.state.status === VoiceConnectionStatus.Destroyed) {
+                this.connection = null;
             }
-            this.prevStream = null;
-        }
-        if (this.prevPlayer) {
-            player = this.prevPlayer;
-            listenForPlayer = false;
-        }
-        if (this.prevConnection) {
-            if (this.prevConnection.state.status === VoiceConnectionStatus.Destroyed) {
-                this.prevConnection = null;
-            }
-            else if (this.prevConnection.joinConfig.channelId !== voiceChannel.id) {
-                this.prevConnection.destroy();
-                this.prevConnection = null;
+            else if (this.connection.joinConfig.channelId !== voiceChannel.id) {
+                console.log("Destorying connection");
+                this.connection.destroy();
+                this.connection = null;
             }
             else {
-                connection = this.prevConnection;
-                listenForConnection = false;
+                console.log("Reusing connection")
+                connection = this.connection;
+                reuseConnection = true;
             }
         }
 
         // Check if variables not initialized yet
-        if (!player) {
-            player = createAudioPlayer();
-        }
         if (!connection) {
+            console.log("Joining vc");
             connection = joinVoiceChannel({
                 channelId: voiceChannel.id,
                 guildId: voiceChannel.guild.id,
@@ -72,87 +62,68 @@ export class GuildPlayer {
             });
         }
 
+        this.connection = connection;
+
+        const player = createAudioPlayer();
         const resource = createAudioResource(stream);
         player.play(resource);
         connection.subscribe(player);
 
-        if (listenForPlayer) {
-            this.createPlayerListeners(connection, player, stream);
+        this.registerStreamListeners(stream, player, connection);
+        this.registerPlayerListeners(stream, player, connection);
+        if (!reuseConnection) {
+            this.registerConnectionListeners(stream, player, connection);
         }
-        if (listenForConnection) {
-            this.createConnectionListeners(connection, player, stream);
-        }
-
-        this.prevStream = stream;
-        this.prevPlayer = player;
-        this.prevConnection = connection;
-
-        console.log("Started stream, player, connection");
     }
 
-    /**
-     * Private utils
-     */
+    // Register listeners
 
-    private createPlayerListeners(connection: VoiceConnection, player: AudioPlayer, stream: Readable): void {
+    private registerStreamListeners(stream: Readable, player: AudioPlayer, connection: VoiceConnection) {
+        stream.once("error", () => {
+            player.stop(true);
+            if (connection.state.status !== VoiceConnectionStatus.Destroyed) {
+                connection.destroy();
+            }
+        });
+    }
+
+    private registerPlayerListeners(stream: Readable, player: AudioPlayer, connection: VoiceConnection) {
         player.once(AudioPlayerStatus.Idle, () => {
+            console.log("Player idle event");
             if (!stream.destroyed) {
-                console.log("Destroying stream");
                 stream.destroy();
             }
-
             if (connection.state.status !== VoiceConnectionStatus.Destroyed) {
-                console.log("Destorying connection");
                 connection.destroy();
             }
         });
 
-        player.once('error', (error) => {
-            console.error('Error playing audio:', error);
-
-            player.stop(true);
-
+        player.once("error", () => {
+            console.log("Player error event");
             if (!stream.destroyed) {
-                console.log("Destroying stream");
                 stream.destroy();
             }
-
             if (connection.state.status !== VoiceConnectionStatus.Destroyed) {
-                console.log("Destroying connection");
                 connection.destroy();
             }
         });
     }
 
-    private createConnectionListeners(connection: VoiceConnection, player: AudioPlayer, stream: Readable): void {
+    private registerConnectionListeners(stream: Readable, player: AudioPlayer, connection: VoiceConnection) {
         connection.once(VoiceConnectionStatus.Disconnected, () => {
-            player.stop(true);
-
+            console.log("Connection disconnected event");
             if (!stream.destroyed) {
-                console.log("Destroying stream");
                 stream.destroy();
             }
-
-            if (connection.state.status !== VoiceConnectionStatus.Destroyed) {
-                console.log("Destroying connection");
-                connection.destroy();
-            }
+            player.stop(true);
         });
 
-        connection.once("error", (error) => {
-            console.error('Error on connection:', error);
-
-            player.stop(true);
-
+        connection.once("error", () => {
+            console.log("Connection error event");
             if (!stream.destroyed) {
-                console.log("Destroying stream");
                 stream.destroy();
             }
-
-            if (connection.state.status !== VoiceConnectionStatus.Destroyed) {
-                console.log("Destroying connection");
-                connection.destroy();
-            }
+            player.stop(true);
         });
     }
 }
