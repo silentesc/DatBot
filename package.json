@@ -7,7 +7,9 @@
   "type": "commonjs",
   "main": "main.js",
   "scripts": {
-    "dev": "ts-node src/main.ts"
+    "dev": "ts-node src/main.ts",
+    "build": "tsc",
+    "start": "node dist/main.js"
   },
   "dependencies": {
     "@discordjs/voice": "^0.18.0",
