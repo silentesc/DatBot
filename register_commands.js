@@ -24,6 +24,10 @@ const commands = [
                         name: "ping",
                         value: "ping",
                     },
+                    {
+                        name: "play",
+                        value: "play",
+                    },
                 ]
             }
         ]
