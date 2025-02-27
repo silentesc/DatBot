@@ -35,15 +35,17 @@ const commands = [
             {
                 name: "input",
                 description: "The url or name of the song.",
-                type: ApplicationCommandOptionType.String
+                type: ApplicationCommandOptionType.String,
+                required: true
             }
         ]
     }
 ];
 
 async function main() {
-    await deleteAllCommands(false, true);
-    await registerCommands(process.env.GUILD_ID);
+    await deleteAllCommands(false, false);
+    // await registerCommands(process.env.GUILD_ID);
+    await registerCommands();
 }
 
 main();
