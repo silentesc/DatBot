@@ -2,6 +2,8 @@ import { Client, ActivityType, EmbedBuilder, GatewayIntentBits } from "discord.j
 import { readdirSync } from "fs";
 import "dotenv/config";
 
+import { invokeApi } from "./api/api";
+
 
 const commands = new Map();
 readdirSync("./src/commands").filter(file => file.endsWith(".ts")).forEach(fileName => {
@@ -24,6 +26,7 @@ client.on("ready", c => {
         name: "/help",
         type: ActivityType.Watching
     });
+    invokeApi(client);
     console.log(`Logged in as ${c.user.tag}`);
 });
 
