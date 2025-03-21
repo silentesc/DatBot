@@ -4,9 +4,8 @@ import bodyParser from "body-parser";
 import { Client } from "discord.js";
 import "dotenv/config";
 
-import { getChannels, getGuilds } from "./services/guildService";
+import { getChannels, getGuilds, getRoles } from "./services/guildService";
 
-const apiKey = process.env.API_KEY;
 const app = express();
 const port = 3001;
 
@@ -20,6 +19,10 @@ export function invokeApi(client: Client) {
 
     app.get("/guilds/:guildId/channels", async (request: Request, response: Response) => {
         await getChannels(request, response, client);
+    });
+
+    app.get("/guilds/:guildId/roles", async (request: Request, response: Response) => {
+        await getRoles(request, response, client);
     });
 
     app.listen(port, () => {
