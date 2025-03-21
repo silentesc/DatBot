@@ -36,7 +36,8 @@ export async function getChannels(request: Request, response: Response, client: 
     const channels = guild.channels.cache.map(channel => ({
         id: channel.id,
         name: channel.name,
-        type: channel.type
+        type: channel.type,
+        parentId: channel.parentId
     }));
 
     response.status(200).json(channels).send();
