@@ -41,3 +41,28 @@ export async function getChannels(request: Request, response: Response, client: 
 
     response.status(200).json(channels).send();
 }
+
+
+export async function getRoles(request: Request, response: Response, client: Client) {
+    const authHeader = request.headers.authorization;
+
+    if (!authHeader || authHeader !== process.env.API_KEY) {
+        return response.status(403).send('Forbidden');
+    }
+
+    const guildId = request.params.guildId;
+    const guild = client.guilds.cache.get(guildId);
+
+    if (!guild) {
+        return response.status(404).json({ error: "Guild not found" }).send();
+    }
+
+    const roles = guild.roles.cache.map(role => ({
+        id: role.id,
+        name: role.name,
+        color: role.color,
+        position: role.position
+    }));
+
+    response.status(200).json(roles).send();
+}
