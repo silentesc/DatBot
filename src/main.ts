@@ -21,13 +21,37 @@ const client = new Client({
 });
 
 
-client.on("ready", c => {
-    client.user?.setActivity({
+function setActivity() {
+    if (!client.user) {
+        console.error("Failed to set activity. Client user is undefined.");
+        return;
+    }
+    client.user.setActivity({
         name: "/help",
         type: ActivityType.Watching
     });
+}
+
+
+client.once("ready", () => {
+    if (!client.user) {
+        console.error("Client user is undefined after ready event.");
+        return;
+    }
+    setActivity();
     invokeApi(client);
-    console.log(`Logged in as ${c.user.tag}`);
+    console.log(`Logged in as ${client.user.tag}`);
+});
+
+
+client.on("shardResume", (shardId) => {
+    console.log(`Shard ${shardId} resumed.`);
+    setActivity();
+});
+
+
+client.on("shardReconnecting", (shardId) => {
+    console.log(`Shard ${shardId} is reconnecting...`);
 });
 
 
