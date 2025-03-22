@@ -13,7 +13,7 @@ export async function createReactionRole(request: Request, response: Response, c
     const guildId = request.params.guildId as string;
     const channelId = request.params.channelId as string;
     const messageContent = request.query.message as string;
-    const emoji_roles = request.query.emoji_roles as Array<string>;
+    let emoji_roles: Array<string> = request.query.emoji_roles as Array<string>;
 
     if (!guildId || !channelId || !messageContent || !emoji_roles) {
         return response.status(400).json({ error: "guildId or channelId or message or emoji_roles is undefined" }).send();
@@ -31,6 +31,10 @@ export async function createReactionRole(request: Request, response: Response, c
     const channel = guild.channels.cache.get(channelId);
     if (!channel || !channel.isTextBased()) {
         return response.status(404).json({ error: "Channel not found or not a text channel" }).send();
+    }
+
+    if (!Array.isArray(emoji_roles)) {
+        emoji_roles = new Array<string>(emoji_roles);
     }
 
     const emojiRoles: Array<EmojiRole> = [];
