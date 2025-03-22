@@ -6,7 +6,7 @@ export async function getGuilds(request: Request, response: Response, client: Cl
     const authHeader = request.headers.authorization;
 
     if (!authHeader || authHeader !== process.env.API_KEY) {
-        return response.status(403).send('Forbidden');
+        return response.status(403).json({ error: "Forbidden" }).send();
     }
 
     const guilds = client.guilds.cache.map(guild => ({
@@ -23,7 +23,7 @@ export async function getChannels(request: Request, response: Response, client: 
     const authHeader = request.headers.authorization;
 
     if (!authHeader || authHeader !== process.env.API_KEY) {
-        return response.status(403).send('Forbidden');
+        return response.status(403).json({ error: "Forbidden" }).send();
     }
 
     const guildId = request.params.guildId;
@@ -48,7 +48,7 @@ export async function getRoles(request: Request, response: Response, client: Cli
     const authHeader = request.headers.authorization;
 
     if (!authHeader || authHeader !== process.env.API_KEY) {
-        return response.status(403).send('Forbidden');
+        return response.status(403).json({ error: "Forbidden" }).send();
     }
 
     const guildId = request.params.guildId;
