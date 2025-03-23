@@ -53,13 +53,11 @@ module.exports = {
 
         let guild = client.guilds.cache.get(guildId);
         if (!guild) {
-            console.log("guildId not in cache, trying to fetch.")
             guild = await client.guilds.fetch(guildId);
         }
 
         let member = guild.members.cache.get(interactionMember.user.id);
         if (!member) {
-            console.log("member not in cache, trying to fetch.")
             member = await guild.members.fetch(interaction.user.id);
         }
 
