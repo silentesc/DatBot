@@ -60,5 +60,5 @@ export async function createReactionRole(request: Request, response: Response, c
         await sentMessage.react(emojiRole.emoji);
     }
 
-    response.status(201).json({ messageId: sentMessage.id }).send();
+    response.status(201).json({ message_id: sentMessage.id }).send();
 }
