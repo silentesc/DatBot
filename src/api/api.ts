@@ -5,7 +5,7 @@ import { Client } from "discord.js";
 import "dotenv/config";
 
 import { getChannels, getGuilds, getRoles } from "./services/guildService";
-import { createReactionRole } from "./services/reactionRoleService";
+import { createReactionRole, deleteReactionRole } from "./services/reactionRoleService";
 
 const app = express();
 const port = 3001;
@@ -28,6 +28,10 @@ export function invokeApi(client: Client) {
 
     app.post("/reaction_roles/:guildId/:channelId", async (request: Request, response: Response) => {
         await createReactionRole(request, response, client);
+    });
+
+    app.delete("/reaction_roles/:guildId/:channelId/:messageid", async (request: Request, response: Response) => {
+        await deleteReactionRole(request, response, client);
     });
 
     app.listen(port, () => {
