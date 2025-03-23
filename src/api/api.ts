@@ -30,7 +30,7 @@ export function invokeApi(client: Client) {
         await createReactionRole(request, response, client);
     });
 
-    app.delete("/reaction_roles/:guildId/:channelId/:messageid", async (request: Request, response: Response) => {
+    app.delete("/reaction_roles/:guildId/:channelId/:messageId", async (request: Request, response: Response) => {
         await deleteReactionRole(request, response, client);
     });
 
