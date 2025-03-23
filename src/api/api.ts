@@ -26,7 +26,7 @@ export function invokeApi(client: Client) {
         await getRoles(request, response, client);
     });
 
-    app.post("/reaction_role/:guildId/:channelId", async (request: Request, response: Response) => {
+    app.post("/reaction_roles/:guildId/:channelId", async (request: Request, response: Response) => {
         await createReactionRole(request, response, client);
     });
 
