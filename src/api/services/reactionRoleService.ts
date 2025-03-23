@@ -23,12 +23,12 @@ export async function createReactionRole(request: Request, response: Response, c
         return response.status(400).json({ error: "Maximum message length of 2000 is exceeded" }).send();
     }
 
-    const guild = client.guilds.cache.get(guildId);
+    const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId) : client.guilds.cache.get(guildId);
     if (!guild) {
         return response.status(404).json({ error: "Guild not found" }).send();
     }
 
-    const channel = guild.channels.cache.get(channelId);
+    const channel = (!guild.channels.cache.get(channelId)) ? await guild.channels.fetch(channelId) : guild.channels.cache.get(channelId);
     if (!channel || !channel.isTextBased()) {
         return response.status(404).json({ error: "Channel not found or not a text channel" }).send();
     }
@@ -43,7 +43,7 @@ export async function createReactionRole(request: Request, response: Response, c
         if (emojiRoles.some(er => er.emoji === emoji)) {
             return response.status(400).json({ error: `Duplicate emoji: ${emoji}` }).send();
         }
-        const role = guild.roles.cache.get(role_id);
+        const role = (!guild.roles.cache.get(role_id)) ? await guild.roles.fetch(role_id) : guild.roles.cache.get(role_id);
         if (!role) {
             return response.status(400).json({ error: `Role not found: ${role_id}` }).send();
         }
@@ -57,7 +57,12 @@ export async function createReactionRole(request: Request, response: Response, c
     const sentMessage: Message = await channel.send(messageContent);
 
     for (const emojiRole of emojiRoles) {
-        await sentMessage.react(emojiRole.emoji);
+        try {
+            await sentMessage.react(emojiRole.emoji);
+        } catch (error) {
+            console.error(`Failed to react when creating a reaction role with error: ${error}`);
+            return response.status(500).json({ error: `Failed to react with emoji: ${emojiRole.emoji}` }).send();
+        }
     }
 
     // TODO Add to listener
@@ -81,12 +86,12 @@ export async function deleteReactionRole(request: Request, response: Response, c
         return response.status(400).json({ error: "guildId or channelId or messageId is undefined" }).send();
     }
 
-    const guild = client.guilds.cache.get(guildId);
+    const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId) : client.guilds.cache.get(guildId);
     if (!guild) {
         return response.status(404).json({ error: "Guild not found" }).send();
     }
 
-    const channel = guild.channels.cache.get(channelId);
+    const channel = (!guild.channels.cache.get(channelId)) ? await guild.channels.fetch(channelId) : guild.channels.cache.get(channelId);
     if (!channel || !channel.isTextBased()) {
         return response.status(404).json({ error: "Channel not found or not a text channel" }).send();
     }
