@@ -1,6 +1,7 @@
 import { Client, Message } from "discord.js";
 import { Request, Response } from "express";
 import { EmojiRole } from "../models";
+import { reactionRoles, setReactionRoles } from "../../utils/cache";
 
 
 export async function createReactionRole(request: Request, response: Response, client: Client) {
@@ -47,6 +48,13 @@ export async function createReactionRole(request: Request, response: Response, c
         if (!role) {
             return response.status(400).json({ error: `Role not found: ${role_id}` }).send();
         }
+        if (role.id === guild.id) {
+            return response.status(400).json({ error: "Role cannot be @everyone role" }).send();
+        }
+        if (role.managed) {
+            return response.status(400).json({ error: "Role cannot be a bot or integration role" }).send();
+        }
+        if (role.managed)
         emojiRoles.push({ emoji, role_id });
     }
 
@@ -65,7 +73,10 @@ export async function createReactionRole(request: Request, response: Response, c
         }
     }
 
-    // TODO Add to listener
+    reactionRoles.push({
+        "message_id": sentMessage.id,
+        "emoji_roles": emojiRoles,
+    });
 
     response.status(201).json({ message_id: sentMessage.id }).send();
 }
@@ -103,7 +114,10 @@ export async function deleteReactionRole(request: Request, response: Response, c
         return response.status(404).json({ error: "Message not found" }).send();
     }
 
-    // TODO Delete from listener
+    const updatedReactionRoles = reactionRoles.filter(
+        role => role["message_id"] !== messageId
+    );
+    setReactionRoles(updatedReactionRoles);
 
     response.status(204).send();
 }

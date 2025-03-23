@@ -1,8 +1,12 @@
-import { Client, ActivityType, EmbedBuilder, GatewayIntentBits } from "discord.js";
+import { Client, ActivityType, EmbedBuilder, GatewayIntentBits, MessageReaction, PartialMessageReaction, User, PartialUser, MessageReactionEventDetails, Partials } from "discord.js";
 import { readdirSync } from "fs";
 import "dotenv/config";
 
 import { invokeApi } from "./api/api";
+import { onMessageReactionAdd } from "./events/messageReactionAdd";
+import { onMessageReactionRemove } from "./events/messageReactionRemove";
+import { reactionRoles } from "./utils/cache";
+import axios from "axios";
 
 
 const commands = new Map();
@@ -17,7 +21,15 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildVoiceStates,
-    ]
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMessageReactions,
+    ],
+    partials: [
+        Partials.Message,
+        Partials.Channel,
+        Partials.Reaction,
+    ],
 });
 
 
@@ -33,11 +45,20 @@ function setActivity() {
 }
 
 
-client.once("ready", () => {
+client.once("ready", async () => {
     if (!client.user) {
         console.error("Client user is undefined after ready event.");
         return;
     }
+
+    const guildIds: Array<string> = client.guilds.cache.map(guild => guild.id);
+    for (const guildId of guildIds) {
+        const response = await axios.get(`${process.env.BACKEND_URL}/reaction_role/reaction_roles/${guildId}`, { params: { "api_key": process.env.API_KEY } });
+        for (const entry of response.data) {
+            reactionRoles.push(entry);
+        }
+    }
+
     setActivity();
     invokeApi(client);
     console.log(`Logged in as ${client.user.tag}`);
@@ -52,6 +73,16 @@ client.on("shardResume", (shardId) => {
 
 client.on("shardReconnecting", (shardId) => {
     console.log(`Shard ${shardId} is reconnecting...`);
+});
+
+
+client.on("messageReactionAdd", async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser, _: MessageReactionEventDetails) => {
+    await onMessageReactionAdd(client, reaction, user);
+});
+
+
+client.on("messageReactionRemove", async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser, _: MessageReactionEventDetails) => {
+    await onMessageReactionRemove(client, reaction, user);
 });
 
 
