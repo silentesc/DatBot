@@ -60,5 +60,45 @@ export async function createReactionRole(request: Request, response: Response, c
         await sentMessage.react(emojiRole.emoji);
     }
 
+    // TODO Add to listener
+
     response.status(201).json({ message_id: sentMessage.id }).send();
+}
+
+
+export async function deleteReactionRole(request: Request, response: Response, client: Client) {
+    const authHeader = request.headers.authorization;
+
+    if (!authHeader || authHeader !== process.env.API_KEY) {
+        return response.status(403).json({ error: "Forbidden" }).send();
+    }
+
+    const guildId = request.params.guildId as string;
+    const channelId = request.params.channelId as string;
+    const messageId = request.params.messageId as string;
+
+    if (!guildId || !channelId || !messageId) {
+        return response.status(400).json({ error: "guildId or channelId or messageId is undefined" }).send();
+    }
+
+    const guild = client.guilds.cache.get(guildId);
+    if (!guild) {
+        return response.status(404).json({ error: "Guild not found" }).send();
+    }
+
+    const channel = guild.channels.cache.get(channelId);
+    if (!channel || !channel.isTextBased()) {
+        return response.status(404).json({ error: "Channel not found or not a text channel" }).send();
+    }
+
+    try {
+        const message = await channel.messages.fetch(messageId);
+        await message.delete();
+    } catch (error) {
+        return response.status(404).json({ error: "Message not found" }).send();
+    }
+
+    // TODO Delete from listener
+
+    response.status(204).send();
 }
