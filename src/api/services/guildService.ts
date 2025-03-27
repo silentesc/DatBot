@@ -27,13 +27,20 @@ export async function getChannels(request: Request, response: Response, client: 
     }
 
     const guildId = request.params.guildId;
-    const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId) : client.guilds.cache.get(guildId);
+    const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId).catch(_ => {}) : client.guilds.cache.get(guildId);
 
     if (!guild) {
         return response.status(404).json({ error: "Guild not found" }).send();
     }
 
-    const channels = await guild.channels.fetch();
+    let channels;
+    try {
+        channels = await guild.channels.fetch();
+    } catch (error) {
+        console.error(error);
+        return response.status(500).json({ error: "Failed to fetch channels" }).send();
+    }
+
     const channelData = channels
         .map(channel => channel ? ({
             id: channel.id,
@@ -55,13 +62,20 @@ export async function getRoles(request: Request, response: Response, client: Cli
     }
 
     const guildId = request.params.guildId;
-    const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId) : client.guilds.cache.get(guildId);
+    const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId).catch(_ => {}) : client.guilds.cache.get(guildId);
 
     if (!guild) {
         return response.status(404).json({ error: "Guild not found" }).send();
     }
 
-    const roles = await guild.roles.fetch();
+    let roles;
+    try {
+        roles = await guild.roles.fetch();
+    } catch (error) {
+        console.error(error);
+        return response.status(500).json({ error: "Failed to fetch roles" }).send();
+    }
+
     const roleData = roles.map(role => ({
         id: role.id,
         name: role.name,

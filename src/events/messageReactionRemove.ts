@@ -50,13 +50,13 @@ export async function onMessageReactionRemove(client: Client, reaction: MessageR
         return;
     }
 
-    const role = (!reaction.message.guild.roles.cache.get(roleId)) ? await reaction.message.guild.roles.fetch(roleId) : reaction.message.guild.roles.cache.get(roleId);
+    const role = (!reaction.message.guild.roles.cache.get(roleId)) ? await reaction.message.guild.roles.fetch(roleId).catch(_ => {}) : reaction.message.guild.roles.cache.get(roleId);
     if (!role) {
         console.error(`Role id '${roleId}' is not found in guild`);
         return;
     }
 
-    const member = (!reaction.message.guild.members.cache.get(user.id)) ? await reaction.message.guild.members.fetch(user.id) : reaction.message.guild.members.cache.get(user.id);
+    const member = (!reaction.message.guild.members.cache.get(user.id)) ? await reaction.message.guild.members.fetch(user.id).catch(_ => {}) : reaction.message.guild.members.cache.get(user.id);
     if (!member) {
         console.error(`Member with id '${user.id}' is not found in guild`);
         return;

@@ -51,14 +51,16 @@ module.exports = {
             return;
         }
 
-        let guild = client.guilds.cache.get(guildId);
+        let guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId).catch(_ => {}) : client.guilds.cache.get(guildId);
         if (!guild) {
-            guild = await client.guilds.fetch(guildId);
+            console.error("Error when fetching guilds");
+            return;
         }
 
-        let member = guild.members.cache.get(interactionMember.user.id);
+        let member = (!guild.members.cache.get(interactionMember.user.id)) ? await guild.members.fetch(interaction.user.id).catch(_ => {}) : guild.members.cache.get(interactionMember.user.id);
         if (!member) {
-            member = await guild.members.fetch(interaction.user.id);
+            console.error("Error when fetching member");
+            return;
         }
 
         const voiceChannel = member.voice.channel;
