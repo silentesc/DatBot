@@ -53,19 +53,7 @@ client.once("ready", async () => {
 
     const guildIds: Array<string> = client.guilds.cache.map((guild) => guild.id);
     for (const guildId of guildIds) {
-        const response = await axios
-            .get(
-                `${process.env.BACKEND_URL}/reaction_role/reaction_roles/${guildId}`,
-                { params: { api_key: process.env.API_KEY } }
-            )
-            .catch((error) => {
-                if (!error.response || error.response.status !== 404) {
-                    throw error;
-                }
-            });
-        if (!response || !response.data) {
-            continue;
-        }
+        const response = await axios.get(`${process.env.BACKEND_URL}/reaction_role/reaction_roles/${guildId}`, { params: { api_key: process.env.API_KEY } });
         for (const entry of response.data) {
             reactionRoles.push(entry);
         }
