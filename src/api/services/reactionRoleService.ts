@@ -1,7 +1,7 @@
 import { Client, Message } from "discord.js";
 import { Request, Response } from "express";
 import { EmojiRole } from "../models";
-import { reactionRoles, setReactionRoles } from "../../utils/cache";
+import { reactionRoles, ReactionRoleType, setReactionRoles } from "../../utils/cache";
 
 
 export async function createReactionRole(request: Request, response: Response, client: Client) {
@@ -13,11 +13,16 @@ export async function createReactionRole(request: Request, response: Response, c
 
     const guildId = request.params.guildId as string;
     const channelId = request.params.channelId as string;
+    const type = request.query.type as string;
     const messageContent = request.query.message as string;
     let emoji_roles: Array<string> = request.query.emoji_roles as Array<string>;
 
-    if (!guildId || !channelId || !messageContent || !emoji_roles) {
-        return response.status(400).json({ error: "guildId or channelId or message or emoji_roles is undefined" }).send();
+    if (!guildId || !channelId || !type || !messageContent || !emoji_roles) {
+        return response.status(400).json({ error: "guildId or channelId or type or message or emoji_roles is undefined" }).send();
+    }
+
+    if (!Object.values(ReactionRoleType).includes(type as ReactionRoleType)) {
+        return response.status(400).json({ error: `type not valid. Valid types: ${Object.values(ReactionRoleType).join(", ")}` }).send();
     }
 
     if (messageContent.length > 2000) {
@@ -54,8 +59,11 @@ export async function createReactionRole(request: Request, response: Response, c
         if (role.managed) {
             return response.status(400).json({ error: "Role cannot be a bot or integration role" }).send();
         }
-        if (role.managed)
         emojiRoles.push({ emoji, role_id });
+    }
+
+    if (emojiRoles.length < 1) {
+        return response.status(400).json({ error: "At least one emoji is required" }).send();
     }
 
     if (emojiRoles.length > 20) {
@@ -74,6 +82,7 @@ export async function createReactionRole(request: Request, response: Response, c
     }
 
     reactionRoles.push({
+        "type": type,
         "message_id": sentMessage.id,
         "emoji_roles": emojiRoles,
     });
@@ -108,8 +117,10 @@ export async function deleteReactionRole(request: Request, response: Response, c
     }
 
     try {
-        const message = await channel.messages.fetch(messageId);
-        await message.delete();
+        const message = await channel.messages.fetch(messageId).catch(_ => { });
+        if (message) {
+            await message.delete();
+        }
     } catch (error) {
         return response.status(404).json({ error: "Message not found" }).send();
     }
