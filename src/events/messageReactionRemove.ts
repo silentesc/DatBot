@@ -46,7 +46,6 @@ export async function onMessageReactionRemove(client: Client, reaction: MessageR
     }
 
     if (!roleId) {
-        console.error("emoji not found in reaction role, returning");
         return;
     }
 

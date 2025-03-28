@@ -24,10 +24,7 @@ export class GuildPlayer {
     }
 
     public play(stream: Readable, voiceChannel: VoiceBasedChannel) {
-        console.log("play method called");
-
         if (this.stream) {
-            console.log("Destroyed old stream");
             this.stream.destroy();
         }
         this.stream = stream;
@@ -41,12 +38,10 @@ export class GuildPlayer {
                 this.connection = null;
             }
             else if (this.connection.joinConfig.channelId !== voiceChannel.id) {
-                console.log("Destorying connection");
                 this.connection.destroy();
                 this.connection = null;
             }
             else {
-                console.log("Reusing connection")
                 connection = this.connection;
                 reuseConnection = true;
             }
@@ -54,7 +49,6 @@ export class GuildPlayer {
 
         // Check if variables not initialized yet
         if (!connection) {
-            console.log("Joining vc");
             connection = joinVoiceChannel({
                 channelId: voiceChannel.id,
                 guildId: voiceChannel.guild.id,
@@ -89,7 +83,6 @@ export class GuildPlayer {
 
     private registerPlayerListeners(stream: Readable, player: AudioPlayer, connection: VoiceConnection) {
         player.once(AudioPlayerStatus.Idle, () => {
-            console.log("Player idle event");
             if (!stream.destroyed) {
                 stream.destroy();
             }
@@ -99,7 +92,6 @@ export class GuildPlayer {
         });
 
         player.once("error", () => {
-            console.log("Player error event");
             if (!stream.destroyed) {
                 stream.destroy();
             }
@@ -111,7 +103,6 @@ export class GuildPlayer {
 
     private registerConnectionListeners(stream: Readable, player: AudioPlayer, connection: VoiceConnection) {
         connection.once(VoiceConnectionStatus.Disconnected, () => {
-            console.log("Connection disconnected event");
             if (!stream.destroyed) {
                 stream.destroy();
             }
@@ -119,7 +110,6 @@ export class GuildPlayer {
         });
 
         connection.once("error", () => {
-            console.log("Connection error event");
             if (!stream.destroyed) {
                 stream.destroy();
             }

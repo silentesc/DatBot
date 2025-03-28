@@ -49,7 +49,6 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
     }
 
     if (!roleId) {
-        console.error("emoji not found in reaction role, returning");
         return;
     }
 
