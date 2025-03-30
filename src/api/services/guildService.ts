@@ -76,12 +76,14 @@ export async function getRoles(request: Request, response: Response, client: Cli
         return response.status(500).json({ error: "Failed to fetch roles" }).send();
     }
 
-    const roleData = roles.map(role => ({
-        id: role.id,
-        name: role.name,
-        color: role.color,
-        position: role.position
-    }));
+    const roleData = roles
+        .map(role => ({
+            id: role.id,
+            name: role.name,
+            color: role.color,
+            position: role.position,
+            managed: role.managed,
+        }));
 
     response.status(200).json(roleData).send();
 }
