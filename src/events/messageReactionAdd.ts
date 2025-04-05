@@ -89,26 +89,30 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
         return;
     }
 
+    // Unique reaction
     if (type === ReactionRoleType.UNIQUE.toString()) {
-        // Remove reactions except the new one
+        // Get reactions to remove
         console.log(Date.now() - now, "Getting emojis to remove...");
-        const emojisToRemove: Array<string> = reaction.message.reactions.cache
-            .map(reaction => reaction.emoji.toString())
-            .filter(e => e !== emoji);
+        const userReactions = reaction.message.reactions.cache
+            .filter(reaction => {
+                if (!reaction.users.cache.has(user.id)) {
+                    return false;
+                }
+                if (reaction.emoji.toString() === emoji) {
+                    return false;
+                }
+                return true;
+            });
         console.log(Date.now() - now, "Got emojis to remove.");
 
+        // Remove reactions
         console.log(Date.now() - now, "Removing reactions...");
-        for (const emojiToRemove of emojisToRemove) {
-            const reactionToRemove = reaction.message.reactions.cache.find(r => r.emoji.toString() === emojiToRemove);
-            if (reactionToRemove) {
-                try {
-                    console.log(Date.now() - now, "Removing reaction", reactionToRemove.emoji.name);
-                    await reactionToRemove.users.remove(user.id);
-                    console.log(Date.now() - now, "Removed reaction", reactionToRemove.emoji.name);
-                } catch (error) {
-                    console.error(`Error removing reaction '${emojiToRemove}' from user:`, error);
-                }
-            }
+        try {
+            console.log(Date.now() - now, "Removing reactions...");
+            await Promise.all(userReactions.map(reaction => reaction.users.remove(user.id)));
+            console.log(Date.now() - now, "Removed reactions.");
+        } catch (error) {
+            console.error(`Error removing reactions from user:`, error);
         }
         console.log(Date.now() - now, "Removed all reactions.");
 
@@ -119,16 +123,12 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
         const commonRoleIds = memberRoleIds.filter(roleId => reactionRoleIds.includes(roleId));
 
         console.log(Date.now() - now, "Removing all roles...");
-        for (let i = 0; i < commonRoleIds.length; i++) {
-            const commonRoleId = commonRoleIds[i];
-
-            try {
-                console.log(Date.now() - now, "Removing role", commonRoleId);
-                await member.roles.remove(commonRoleId);
-                console.log(Date.now() - now, "Removed role", commonRoleId);
-            } catch (error) {
-                console.error('Error removing role from user:', error);
-            }
+        try {
+            console.log(Date.now() - now, "Removing roles...");
+            await Promise.all(commonRoleIds.map(roleId => member.roles.remove(roleId)));
+            console.log(Date.now() - now, "Removed roles");
+        } catch (error) {
+            console.error('Error removing roles from user:', error);
         }
         console.log(Date.now() - now, "Removed all roles.");
     }
