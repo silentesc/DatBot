@@ -26,6 +26,10 @@ export async function onMessageReactionRemove(client: Client, reaction: MessageR
         return;
     }
 
+    if (user.bot) {
+        return;
+    }
+
     const emoji: string = reaction.emoji.toString();
     const messageId: string = reaction.message.id;
 
