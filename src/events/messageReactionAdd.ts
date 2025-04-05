@@ -4,13 +4,9 @@ import { EmojiRole } from "../api/models";
 
 
 export async function onMessageReactionAdd(client: Client, reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) {
-    const now = Date.now();
-    console.log(Date.now() - now, "Event received");
     if (reaction.partial) {
         try {
-            console.log(Date.now() - now, "Reaction partial, fetching...");
             reaction = await reaction.fetch();
-            console.log(Date.now() - now, "Fetched reaction successfully.");
         } catch (error) {
             console.error('Error fetching reaction:', error);
             return;
@@ -19,9 +15,7 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
 
     if (user.partial) {
         try {
-            console.log(Date.now() - now, "User partial, fetching...");
             user = await user.fetch();
-            console.log(Date.now() - now, "Fetched user successfully.");
         } catch (error) {
             console.error('Error fetching user:', error);
             return;
@@ -32,7 +26,6 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
         return;
     }
 
-
     const emoji: string = reaction.emoji.toString();
     const messageId: string = reaction.message.id;
 
@@ -41,7 +34,6 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
     let roleId;
     let type;
 
-    console.log(Date.now() - now, "Searching for role in reactionRoles...");
     for (const reactionRole of reactionRoles) {
         if (reactionRole["message_id"] === messageId) {
             emojiRoles = reactionRole["emoji_roles"] as Array<EmojiRole>;
@@ -56,7 +48,6 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
             break;
         }
     }
-    console.log(Date.now() - now, "Search finished.");
 
 
     if (!roleId) {
@@ -73,17 +64,13 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
         return;
     }
 
-    console.log(Date.now() - now, "Getting role...");
     const role = (!reaction.message.guild.roles.cache.get(roleId)) ? await reaction.message.guild.roles.fetch(roleId).catch(_ => { }) : reaction.message.guild.roles.cache.get(roleId);
-    console.log(Date.now() - now, "Got role.");
     if (!role) {
         console.error(`Role id '${roleId}' is not found in guild`);
         return;
     }
 
-    console.log(Date.now() - now, "Getting member...");
     const member = (!reaction.message.guild.members.cache.get(user.id)) ? await reaction.message.guild.members.fetch(user.id).catch(_ => { }) : reaction.message.guild.members.cache.get(user.id);
-    console.log(Date.now() - now, "Got member.");
     if (!member) {
         console.error(`Member with id '${user.id}' is not found in guild`);
         return;
@@ -92,7 +79,6 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
     // Unique reaction
     if (type === ReactionRoleType.UNIQUE.toString()) {
         // Get reactions to remove
-        console.log(Date.now() - now, "Getting emojis to remove...");
         const userReactions = reaction.message.reactions.cache
             .filter(reaction => {
                 if (!reaction.users.cache.has(user.id)) {
@@ -103,18 +89,13 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
                 }
                 return true;
             });
-        console.log(Date.now() - now, "Got emojis to remove.");
 
         // Remove reactions
-        console.log(Date.now() - now, "Removing reactions...");
         try {
-            console.log(Date.now() - now, "Removing reactions...");
-            await Promise.all(userReactions.map(reaction => reaction.users.remove(user.id)));
-            console.log(Date.now() - now, "Removed reactions.");
+            await Promise.all(userReactions.map(reaction => reaction.users.remove(user.id).catch(error => console.error("Error removing reaction: ", error))));
         } catch (error) {
             console.error(`Error removing reactions from user:`, error);
         }
-        console.log(Date.now() - now, "Removed all reactions.");
 
         // Remove roles
         const memberRoleIds: Array<string> = member.roles.cache.map(role => role.id);
@@ -122,25 +103,30 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
 
         const commonRoleIds = memberRoleIds.filter(roleId => reactionRoleIds.includes(roleId));
 
-        console.log(Date.now() - now, "Removing all roles...");
         try {
-            console.log(Date.now() - now, "Removing roles...");
-            await Promise.all(commonRoleIds.map(roleId => member.roles.remove(roleId)));
-            console.log(Date.now() - now, "Removed roles");
+            await Promise.all(commonRoleIds.map(roleId => member.roles.remove(roleId).catch(error => console.error("Error removing role: ", error))));
         } catch (error) {
             console.error('Error removing roles from user:', error);
         }
-        console.log(Date.now() - now, "Removed all roles.");
     }
 
     try {
-        console.log(Date.now() - now, "Adding role...");
+        // Try do add new role
         await member.roles.add(role);
-        console.log(Date.now() - now, "Added role.");
     } catch (error) {
         console.error('Error adding role to user:', error);
+        // Remove role because of error
+        try {
+            await reaction.users.remove(user.id);
+        } catch (error) {
+            console.error('Error removing reaction:', error);
+        }
+        // Send message about error
+        try {
+            await reaction.message.channel.send("❌**Error!**\nFailed to add role. Make sure I have the right permissions and my role is above all other roles.");
+        }
+        catch (error) {
+            console.error("Error sending message:", error);
+        }
     }
-
-    console.log(Date.now() - now, "Done.");
-    console.log("");
 }
