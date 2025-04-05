@@ -54,8 +54,8 @@ client.once("ready", async () => {
     // Load reaction roles and fetch guild, channel, message and reactions users into cache
     const guildIds: Array<string> = client.guilds.cache.map((guild) => guild.id);
     for (const guildId of guildIds) {
-        const response = await axios.get(`${process.env.BACKEND_URL}/reaction_role/reaction_roles/${guildId}`, { params: { api_key: process.env.API_KEY } });
         console.log("Fetching data for reaction roles from guild", guildId);
+        const response = await axios.get(`${process.env.BACKEND_URL}/reaction_role/reaction_roles/${guildId}`, { params: { api_key: process.env.API_KEY } });
         for (const entry of response.data) {
             const channelId = entry["channel_id"]
             const messageId = entry["message_id"]
@@ -63,7 +63,11 @@ client.once("ready", async () => {
             const channel = await guild.channels.fetch(channelId);
             if (channel && channel.isTextBased()) {
                 const message = await channel.messages.fetch(messageId);
-                message.reactions.cache.map(r => r.users.fetch());
+                await Promise.all(message.reactions.cache.map(r => r.users.fetch()));
+                console.log("Fetched message and reaction with id", message.id);
+            }
+            else {
+                console.error("Channel is undefined or not text based");
             }
             reactionRoles.push(entry);
         }
