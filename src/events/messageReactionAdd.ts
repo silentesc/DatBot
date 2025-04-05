@@ -26,6 +26,10 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
         return;
     }
 
+    if (user.bot) {
+        return;
+    }
+
     const emoji: string = reaction.emoji.toString();
     const messageId: string = reaction.message.id;
 
