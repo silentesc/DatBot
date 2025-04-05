@@ -55,8 +55,8 @@ client.once("ready", async () => {
     const guildIds: Array<string> = client.guilds.cache.map((guild) => guild.id);
     for (const guildId of guildIds) {
         const response = await axios.get(`${process.env.BACKEND_URL}/reaction_role/reaction_roles/${guildId}`, { params: { api_key: process.env.API_KEY } });
+        console.log("Fetching data for reaction roles from guild", guildId);
         for (const entry of response.data) {
-            console.log("Fetching data for reaction roles from guild", guildId);
             const channelId = entry["channel_id"]
             const messageId = entry["message_id"]
             const guild = await client.guilds.fetch(guildId);
@@ -66,8 +66,8 @@ client.once("ready", async () => {
                 message.reactions.cache.map(r => r.users.fetch());
             }
             reactionRoles.push(entry);
-            console.log("Fetch complete for guild", guildId);
         }
+        console.log("Fetch complete for guild", guildId);
     }
 
     setActivity();
