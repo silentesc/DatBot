@@ -102,9 +102,9 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
             const reactionToRemove = reaction.message.reactions.cache.find(r => r.emoji.toString() === emojiToRemove);
             if (reactionToRemove) {
                 try {
-                    console.log(Date.now() - now, "Removing reaction", reactionToRemove.emoji);
+                    console.log(Date.now() - now, "Removing reaction", reactionToRemove.emoji.name);
                     await reactionToRemove.users.remove(user.id);
-                    console.log(Date.now() - now, "Removed reaction", reactionToRemove.emoji);
+                    console.log(Date.now() - now, "Removed reaction", reactionToRemove.emoji.name);
                 } catch (error) {
                     console.error(`Error removing reaction '${emojiToRemove}' from user:`, error);
                 }
