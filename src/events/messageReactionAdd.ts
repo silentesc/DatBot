@@ -4,12 +4,13 @@ import { EmojiRole } from "../api/models";
 
 
 export async function onMessageReactionAdd(client: Client, reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) {
-    console.log(new Date().toLocaleString(), "Event received");
+    const now = Date.now();
+    console.log(Date.now() - now, "Event received");
     if (reaction.partial) {
         try {
-            console.log(new Date().toLocaleString(), "Reaction partial, fetching...");
+            console.log(Date.now() - now, "Reaction partial, fetching...");
             reaction = await reaction.fetch();
-            console.log(new Date().toLocaleString(), "Fetched reaction successfully.");
+            console.log(Date.now() - now, "Fetched reaction successfully.");
         } catch (error) {
             console.error('Error fetching reaction:', error);
             return;
@@ -18,9 +19,9 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
 
     if (user.partial) {
         try {
-            console.log(new Date().toLocaleString(), "User partial, fetching...");
+            console.log(Date.now() - now, "User partial, fetching...");
             user = await user.fetch();
-            console.log(new Date().toLocaleString(), "Fetched user successfully.");
+            console.log(Date.now() - now, "Fetched user successfully.");
         } catch (error) {
             console.error('Error fetching user:', error);
             return;
@@ -40,7 +41,7 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
     let roleId;
     let type;
 
-    console.log(new Date().toLocaleString(), "Searching for role in reactionRoles...");
+    console.log(Date.now() - now, "Searching for role in reactionRoles...");
     for (const reactionRole of reactionRoles) {
         if (reactionRole["message_id"] === messageId) {
             emojiRoles = reactionRole["emoji_roles"] as Array<EmojiRole>;
@@ -55,7 +56,7 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
             break;
         }
     }
-    console.log(new Date().toLocaleString(), "Search finished.");
+    console.log(Date.now() - now, "Search finished.");
 
 
     if (!roleId) {
@@ -72,17 +73,17 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
         return;
     }
 
-    console.log(new Date().toLocaleString(), "Getting role...");
+    console.log(Date.now() - now, "Getting role...");
     const role = (!reaction.message.guild.roles.cache.get(roleId)) ? await reaction.message.guild.roles.fetch(roleId).catch(_ => { }) : reaction.message.guild.roles.cache.get(roleId);
-    console.log(new Date().toLocaleString(), "Got role.");
+    console.log(Date.now() - now, "Got role.");
     if (!role) {
         console.error(`Role id '${roleId}' is not found in guild`);
         return;
     }
 
-    console.log(new Date().toLocaleString(), "Getting member...");
+    console.log(Date.now() - now, "Getting member...");
     const member = (!reaction.message.guild.members.cache.get(user.id)) ? await reaction.message.guild.members.fetch(user.id).catch(_ => { }) : reaction.message.guild.members.cache.get(user.id);
-    console.log(new Date().toLocaleString(), "Got member.");
+    console.log(Date.now() - now, "Got member.");
     if (!member) {
         console.error(`Member with id '${user.id}' is not found in guild`);
         return;
@@ -90,26 +91,26 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
 
     if (type === ReactionRoleType.UNIQUE.toString()) {
         // Remove reactions except the new one
-        console.log(new Date().toLocaleString(), "Getting emojis to remove...");
+        console.log(Date.now() - now, "Getting emojis to remove...");
         const emojisToRemove: Array<string> = reaction.message.reactions.cache
             .map(reaction => reaction.emoji.toString())
             .filter(e => e !== emoji);
-        console.log(new Date().toLocaleString(), "Got emojis to remove.");
+        console.log(Date.now() - now, "Got emojis to remove.");
 
-        console.log(new Date().toLocaleString(), "Removing reactions...");
+        console.log(Date.now() - now, "Removing reactions...");
         for (const emojiToRemove of emojisToRemove) {
             const reactionToRemove = reaction.message.reactions.cache.find(r => r.emoji.toString() === emojiToRemove);
             if (reactionToRemove) {
                 try {
-                    console.log(new Date().toLocaleString(), "Removing reaction", reactionToRemove);
+                    console.log(Date.now() - now, "Removing reaction", reactionToRemove.emoji);
                     await reactionToRemove.users.remove(user.id);
-                    console.log(new Date().toLocaleString(), "Removed reaction", reactionToRemove);
+                    console.log(Date.now() - now, "Removed reaction", reactionToRemove.emoji);
                 } catch (error) {
                     console.error(`Error removing reaction '${emojiToRemove}' from user:`, error);
                 }
             }
         }
-        console.log(new Date().toLocaleString(), "Removed all reactions.");
+        console.log(Date.now() - now, "Removed all reactions.");
 
         // Remove roles
         const memberRoleIds: Array<string> = member.roles.cache.map(role => role.id);
@@ -117,29 +118,29 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
 
         const commonRoleIds = memberRoleIds.filter(roleId => reactionRoleIds.includes(roleId));
 
-        console.log(new Date().toLocaleString(), "Removing all roles...");
+        console.log(Date.now() - now, "Removing all roles...");
         for (let i = 0; i < commonRoleIds.length; i++) {
             const commonRoleId = commonRoleIds[i];
 
             try {
-                console.log(new Date().toLocaleString(), "Removing role", commonRoleId);
+                console.log(Date.now() - now, "Removing role", commonRoleId);
                 await member.roles.remove(commonRoleId);
-                console.log(new Date().toLocaleString(), "Removed role", commonRoleId);
+                console.log(Date.now() - now, "Removed role", commonRoleId);
             } catch (error) {
                 console.error('Error removing role from user:', error);
             }
         }
-        console.log(new Date().toLocaleString(), "Removed all roles.");
+        console.log(Date.now() - now, "Removed all roles.");
     }
 
     try {
-        console.log(new Date().toLocaleString(), "Adding role...");
+        console.log(Date.now() - now, "Adding role...");
         await member.roles.add(role);
-        console.log(new Date().toLocaleString(), "Added role.");
+        console.log(Date.now() - now, "Added role.");
     } catch (error) {
         console.error('Error adding role to user:', error);
     }
 
-    console.log(new Date().toLocaleString(), "Done.");
+    console.log(Date.now() - now, "Done.");
     console.log("");
 }
