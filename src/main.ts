@@ -6,6 +6,8 @@ import { onMessageReactionAdd } from "./events/messageReactionAdd";
 import { onMessageReactionRemove } from "./events/messageReactionRemove";
 import { onReady } from "./events/ready";
 import { setActivity } from "./utils/ActivityHandler";
+import { onGuildCreate } from "./events/guildCreate";
+import { onGuildDelete } from "./events/guildDelete";
 
 
 const commands = new Map();
@@ -48,13 +50,23 @@ client.on("shardReconnecting", (shardId) => {
 });
 
 
-client.on("messageReactionAdd", async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser, _: MessageReactionEventDetails) => {
-    await onMessageReactionAdd(client, reaction, user);
+client.on("messageReactionAdd", (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser, _: MessageReactionEventDetails) => {
+    onMessageReactionAdd(client, reaction, user);
 });
 
 
-client.on("messageReactionRemove", async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser, _: MessageReactionEventDetails) => {
-    await onMessageReactionRemove(client, reaction, user);
+client.on("messageReactionRemove", (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser, _: MessageReactionEventDetails) => {
+    onMessageReactionRemove(client, reaction, user);
+});
+
+
+client.on("guildCreate", guild => {
+    onGuildCreate(guild);
+});
+
+
+client.on("guildDelete", guild => {
+    onGuildDelete(guild);
 });
 
 
