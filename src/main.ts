@@ -1,12 +1,11 @@
-import { Client, ActivityType, EmbedBuilder, GatewayIntentBits, MessageReaction, PartialMessageReaction, User, PartialUser, MessageReactionEventDetails, Partials } from "discord.js";
+import { Client, EmbedBuilder, GatewayIntentBits, MessageReaction, PartialMessageReaction, User, PartialUser, MessageReactionEventDetails, Partials } from "discord.js";
 import { readdirSync } from "fs";
 import "dotenv/config";
 
-import { invokeApi } from "./api/api";
 import { onMessageReactionAdd } from "./events/messageReactionAdd";
 import { onMessageReactionRemove } from "./events/messageReactionRemove";
-import { reactionRoles } from "./utils/cache";
-import axios from "axios";
+import { onReady } from "./events/ready";
+import { setActivity } from "./utils/ActivityHandler";
 
 
 const commands = new Map();
@@ -33,56 +32,14 @@ const client = new Client({
 });
 
 
-function setActivity() {
-    if (!client.user) {
-        console.error("Failed to set activity. Client user is undefined.");
-        return;
-    }
-    client.user.setActivity({
-        name: "/help",
-        type: ActivityType.Watching
-    });
-}
-
-
 client.once("ready", async () => {
-    if (!client.user) {
-        console.error("Client user is undefined after ready event.");
-        return;
-    }
-
-    // Load reaction roles and fetch guild, channel, message and reactions users into cache
-    const guildIds: Array<string> = client.guilds.cache.map((guild) => guild.id);
-    for (const guildId of guildIds) {
-        console.log("Fetching data for reaction roles from guild", guildId);
-        const response = await axios.get(`${process.env.BACKEND_URL}/reaction_role/reaction_roles/${guildId}`, { params: { api_key: process.env.API_KEY } });
-        for (const entry of response.data) {
-            const channelId = entry["channel_id"]
-            const messageId = entry["message_id"]
-            const guild = await client.guilds.fetch(guildId);
-            const channel = await guild.channels.fetch(channelId);
-            if (channel && channel.isTextBased()) {
-                const message = await channel.messages.fetch(messageId);
-                await Promise.all(message.reactions.cache.map(r => r.users.fetch()));
-                console.log("Fetched message and reaction with id", message.id);
-            }
-            else {
-                console.error("Channel is undefined or not text based");
-            }
-            reactionRoles.push(entry);
-        }
-        console.log("Fetch complete for guild", guildId);
-    }
-
-    setActivity();
-    invokeApi(client);
-    console.log(`Logged in as ${client.user.tag}`);
+    await onReady(client);
 });
 
 
 client.on("shardResume", (shardId) => {
     console.log(`Shard ${shardId} resumed.`);
-    setActivity();
+    setActivity(client);
 });
 
 
