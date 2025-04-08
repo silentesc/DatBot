@@ -92,7 +92,7 @@ export async function onReady(client: Client) {
     await client.guilds.fetch();
 
     await Promise.all([
-        // handleReactionRoleDataSync(client),
+        handleReactionRoleDataSync(client),
         handleGuildSync(client),
     ]);
 
