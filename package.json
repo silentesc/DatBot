@@ -13,14 +13,11 @@
     "register": "node register_commands.js"
   },
   "dependencies": {
-    "@discordjs/voice": "^0.18.0",
-    "@distube/ytdl-core": "^4.16.4",
     "axios": "^1.8.4",
     "body-parser": "^1.20.3",
     "discord.js": "^14.18.0",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "yt-search": "^2.12.1"
+    "express": "^4.21.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",

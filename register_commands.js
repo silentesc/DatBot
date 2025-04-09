@@ -24,31 +24,16 @@ const commands = [
                         name: "ping",
                         value: "ping",
                     },
-                    {
-                        name: "play",
-                        value: "play",
-                    },
                 ]
             }
         ]
     },
-    {
-        name: "play",
-        description: "Plays the given music.",
-        options: [
-            {
-                name: "input",
-                description: "The url or name of the song.",
-                type: ApplicationCommandOptionType.String,
-                required: true
-            }
-        ]
-    }
 ];
 
 async function main() {
-    await deleteAllCommands(false, false);
+    // await deleteAllCommands(false, true);
     // await registerCommands(process.env.GUILD_ID);
+    await deleteAllCommands(true, false);
     await registerCommands();
 }
 
