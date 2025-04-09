@@ -29,7 +29,8 @@ export async function getChannels(request: Request, response: Response, client: 
             id: channel.id,
             name: channel.name,
             type: channel.type,
-            parentId: channel.parentId
+            parentId: channel.parentId,
+            position: channel.position,
         }) : null)
         .filter(channel => channel !== null);
 
