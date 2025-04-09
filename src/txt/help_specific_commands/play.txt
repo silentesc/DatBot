@@ -1,8 +1,0 @@
-**Options:**
-`input` - The url or name of the song.
-
-**Usage example:**
-`/play [input]`
-
-`[]` - required
-`()` - optional

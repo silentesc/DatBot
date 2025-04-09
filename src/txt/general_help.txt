@@ -3,4 +3,3 @@ Use `/help (command_name)` for detailed explanation.
 **Commands:**
   `/help` -> Displays the Help Page.
   `/ping` -> Shows the client & websocket latency.
-  `/play` -> Plays the given music.
