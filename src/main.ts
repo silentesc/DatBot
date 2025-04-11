@@ -1,4 +1,4 @@
-import { Client, EmbedBuilder, GatewayIntentBits, MessageReaction, PartialMessageReaction, User, PartialUser, MessageReactionEventDetails, Partials } from "discord.js";
+import { Client, EmbedBuilder, GatewayIntentBits, MessageReaction, PartialMessageReaction, User, PartialUser, MessageReactionEventDetails, Partials, GuildMember } from "discord.js";
 import { readdirSync } from "fs";
 import "dotenv/config";
 
@@ -8,6 +8,7 @@ import { onReady } from "./events/ready";
 import { setActivity } from "./utils/ActivityHandler";
 import { onGuildCreate } from "./events/guildCreate";
 import { onGuildDelete } from "./events/guildDelete";
+import { onGuildMemberAdd } from "./events/guildMemberAdd";
 
 
 const commands = new Map();
@@ -67,6 +68,10 @@ client.on("guildCreate", guild => {
 
 client.on("guildDelete", guild => {
     onGuildDelete(guild);
+});
+
+client.on("guildMemberAdd", (member: GuildMember) => {
+    onGuildMemberAdd(member);
 });
 
 
