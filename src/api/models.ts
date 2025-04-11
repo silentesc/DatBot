@@ -10,3 +10,19 @@ export interface Guild {
     icon: string | null;
     bot_joined: boolean;
 }
+
+
+export interface Channel {
+    id: string;
+    name: string;
+    type: number;
+    parent_id: string;
+    position: number;
+}
+
+
+export interface WelcomeMessage {
+    guild: Guild;
+    channel: Channel;
+    message: string;
+}
