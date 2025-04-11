@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import { Client } from "discord.js";
 import "dotenv/config";
 
-import { getChannels, getRoles } from "./services/guildService";
+import { getChannels, getGuilds, getRoles } from "./services/guildService";
 import { createReactionRole, deleteReactionRole } from "./services/reactionRoleService";
 
 const app = express();
@@ -14,6 +14,10 @@ app.use(bodyParser.json());
 app.use(express.json());
 
 export function invokeApi(client: Client) {
+    app.get("/guilds", async (request: Request, response: Response) => {
+        await getGuilds(request, response, client);
+    });
+
     app.get("/guilds/:guildId/channels", async (request: Request, response: Response) => {
         await getChannels(request, response, client);
     });
