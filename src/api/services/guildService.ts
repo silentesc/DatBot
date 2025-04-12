@@ -1,4 +1,4 @@
-import { Client } from "discord.js";
+import { Channel, Client, Collection, GuildBasedChannel, NonThreadGuildBasedChannel, ThreadChannel } from "discord.js";
 import { Request, Response } from "express";
 
 
@@ -33,23 +33,38 @@ export async function getChannels(request: Request, response: Response, client: 
         return response.status(404).json({ error: "Guild not found" }).send();
     }
 
-    let channels;
-    try {
-        channels = await guild.channels.fetch();
-    } catch (error) {
-        console.error(error);
-        return response.status(500).json({ error: "Failed to fetch channels" }).send();
+    let channelsCollection: Collection<string, NonThreadGuildBasedChannel>;
+
+    if (guild.channels.cache.size > 0) {
+        channelsCollection = guild.channels.cache
+            .filter(channel => channel !== null)
+            .filter((channel): channel is NonThreadGuildBasedChannel =>
+                !(channel instanceof ThreadChannel) &&
+                (channel && (channel.isTextBased() || channel.isVoiceBased()))
+            );
+    } else {
+        try {
+            console.log("Fetching channels...");
+            const fetchedChannels = await guild.channels.fetch();
+            channelsCollection = fetchedChannels
+                .filter(channel => channel !== null)
+                .filter((channel): channel is NonThreadGuildBasedChannel =>
+                    !(channel instanceof ThreadChannel) &&
+                    (channel.isTextBased() || channel.isVoiceBased())
+                );
+        } catch (error) {
+            console.error(error);
+            return response.status(500).json({ error: "Failed to fetch channels" }).send();
+        }
     }
 
-    const channelData = channels
-        .map(channel => channel ? ({
-            id: channel.id,
-            name: channel.name,
-            type: channel.type,
-            parentId: channel.parentId,
-            position: channel.position,
-        }) : null)
-        .filter(channel => channel !== null);
+    const channelData = channelsCollection.map(channel => ({
+        id: channel.id,
+        name: channel.name,
+        type: channel.type,
+        parentId: channel.parentId,
+        position: channel.position,
+    }));
 
     response.status(200).json(channelData).send();
 }
@@ -70,11 +85,17 @@ export async function getRoles(request: Request, response: Response, client: Cli
     }
 
     let roles;
-    try {
-        roles = await guild.roles.fetch();
-    } catch (error) {
-        console.error(error);
-        return response.status(500).json({ error: "Failed to fetch roles" }).send();
+    if (guild.roles.cache.size > 0) {
+        roles = guild.roles.cache;
+    }
+    else {
+        try {
+            console.log("Fetching roles...");
+            roles = await guild.roles.fetch();
+        } catch (error) {
+            console.error(error);
+            return response.status(500).json({ error: "Failed to fetch roles" }).send();
+        }
     }
 
     const roleData = roles
