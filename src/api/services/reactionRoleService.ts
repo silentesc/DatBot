@@ -15,10 +15,18 @@ export async function createReactionRole(request: Request, response: Response, c
     const channelId = request.params.channelId as string;
     const type = request.query.type as string;
     const messageContent = request.query.message as string;
-    let emoji_roles: Array<string> = request.query.emoji_roles as Array<string>;
+    let emoji_roles = request.query.emoji_roles as string;
 
     if (!guildId || !channelId || !type || !messageContent || !emoji_roles) {
         return response.status(400).json({ error: "guildId or channelId or type or message or emoji_roles is undefined" }).send();
+    }
+
+    let emojiRoles: Array<EmojiRole> = [];
+
+    try {
+        emojiRoles = JSON.parse(emoji_roles);
+    } catch (error) {
+        return response.status(400).json({ error: "Invalid JSON format for emoji_roles" }).send();
     }
 
     if (!Object.values(ReactionRoleType).includes(type as ReactionRoleType)) {
@@ -29,37 +37,14 @@ export async function createReactionRole(request: Request, response: Response, c
         return response.status(400).json({ error: "Maximum message length of 2000 is exceeded" }).send();
     }
 
-    const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId).catch(_ => {}) : client.guilds.cache.get(guildId);
+    const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId).catch(_ => { }) : client.guilds.cache.get(guildId);
     if (!guild) {
         return response.status(404).json({ error: "Guild not found" }).send();
     }
 
-    const channel = (!guild.channels.cache.get(channelId)) ? await guild.channels.fetch(channelId).catch(_ => {}) : guild.channels.cache.get(channelId);
+    const channel = (!guild.channels.cache.get(channelId)) ? await guild.channels.fetch(channelId).catch(_ => { }) : guild.channels.cache.get(channelId);
     if (!channel || !channel.isTextBased()) {
         return response.status(404).json({ error: "Channel not found or not a text channel" }).send();
-    }
-
-    if (!Array.isArray(emoji_roles)) {
-        emoji_roles = new Array<string>(emoji_roles);
-    }
-
-    const emojiRoles: Array<EmojiRole> = [];
-    for (const er of emoji_roles) {
-        const [emoji, role_id] = er.split(' ').map(part => part.split('=')[1].replace(/'/g, ''));
-        if (emojiRoles.some(er => er.emoji === emoji)) {
-            return response.status(400).json({ error: `Duplicate emoji: ${emoji}` }).send();
-        }
-        const role = (!guild.roles.cache.get(role_id)) ? await guild.roles.fetch(role_id).catch(_ => {}) : guild.roles.cache.get(role_id);
-        if (!role) {
-            return response.status(400).json({ error: `Role not found: ${role_id}` }).send();
-        }
-        if (role.id === guild.id) {
-            return response.status(400).json({ error: "Role cannot be @everyone role" }).send();
-        }
-        if (role.managed) {
-            return response.status(400).json({ error: "Role cannot be a bot or integration role" }).send();
-        }
-        emojiRoles.push({ emoji, role_id });
     }
 
     if (emojiRoles.length < 1) {
@@ -106,12 +91,12 @@ export async function deleteReactionRole(request: Request, response: Response, c
         return response.status(400).json({ error: "guildId or channelId or messageId is undefined" }).send();
     }
 
-    const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId).catch(_ => {}) : client.guilds.cache.get(guildId);
+    const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId).catch(_ => { }) : client.guilds.cache.get(guildId);
     if (!guild) {
         return response.status(404).json({ error: "Guild not found" }).send();
     }
 
-    const channel = (!guild.channels.cache.get(channelId)) ? await guild.channels.fetch(channelId).catch(_ => {}) : guild.channels.cache.get(channelId);
+    const channel = (!guild.channels.cache.get(channelId)) ? await guild.channels.fetch(channelId).catch(_ => { }) : guild.channels.cache.get(channelId);
     if (!channel || !channel.isTextBased()) {
         return response.status(404).json({ error: "Channel not found or not a text channel" }).send();
     }
