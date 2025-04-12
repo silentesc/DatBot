@@ -40,7 +40,7 @@ export async function getChannels(request: Request, response: Response, client: 
             .filter(channel => channel !== null)
             .filter((channel): channel is NonThreadGuildBasedChannel =>
                 !(channel instanceof ThreadChannel) &&
-                (channel && (channel.isTextBased() || channel.isVoiceBased()))
+                (channel && (channel.isTextBased() || channel.isVoiceBased() || channel.type === 4))
             );
     } else {
         try {
@@ -50,7 +50,7 @@ export async function getChannels(request: Request, response: Response, client: 
                 .filter(channel => channel !== null)
                 .filter((channel): channel is NonThreadGuildBasedChannel =>
                     !(channel instanceof ThreadChannel) &&
-                    (channel.isTextBased() || channel.isVoiceBased())
+                    (channel.isTextBased() || channel.isVoiceBased() || channel.type === 4)
                 );
         } catch (error) {
             console.error(error);
