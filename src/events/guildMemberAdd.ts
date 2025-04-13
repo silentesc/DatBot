@@ -14,8 +14,9 @@ export async function onGuildMemberAdd(member: GuildMember) {
 
     const welcomeMessage: WelcomeMessage = response.data;
 
-    const channel = await member.guild.channels.fetch(welcomeMessage.channel.id)
-        .catch((error) => console.error("Error while fetching channel on event onGuildMemberAdd", error));
+    const channel = (!member.guild.channels.cache.get(welcomeMessage.channel.id))
+        ? await member.guild.channels.fetch(welcomeMessage.channel.id).catch((error) => console.error("Error while fetching channel on event onGuildMemberAdd", error))
+        : member.guild.channels.cache.get(welcomeMessage.channel.id);
 
     if (!channel) {
         console.error("Channel on event onGuildMemberAdd is null");
