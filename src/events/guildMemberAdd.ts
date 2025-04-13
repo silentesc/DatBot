@@ -9,7 +9,6 @@ export async function onGuildMemberAdd(member: GuildMember) {
         });
 
     if (!response) {
-        console.error("Response is undefined");
         return;
     }
 
