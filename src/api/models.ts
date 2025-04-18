@@ -26,3 +26,12 @@ export interface WelcomeMessage {
     channel: Channel;
     message: string;
 }
+
+
+export interface Role {
+    id: string;
+    name: string;
+    color: number;
+    position: number;
+    managed: boolean;
+}
