@@ -55,7 +55,13 @@ export async function createReactionRole(request: Request, response: Response, c
         return response.status(400).json({ error: "Maximum of 20 emojis on a message is exceeded" }).send();
     }
 
-    const sentMessage: Message = await channel.send(messageContent);
+    let sentMessage: Message;
+    try {
+        sentMessage = await channel.send(messageContent);
+    } catch (error) {
+        console.error(`Failed to send message with error: ${error}`);
+        return response.status(500).json({ error: `Failed to send message` }).send();
+    }
 
     for (const emojiRole of emojiRoles) {
         try {
