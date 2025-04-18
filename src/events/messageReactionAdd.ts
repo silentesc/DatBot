@@ -99,6 +99,10 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
             await Promise.all(userReactions.map(reaction => reaction.users.remove(user.id).catch(error => console.error("Error removing reaction: ", error))));
         } catch (error) {
             console.error(`Error removing reactions from user:`, error);
+            await reaction.message.channel.send("❌**Error!**\nError removing reactions from user. Make sure I have the right permissions and my role is above all other roles.")
+                .catch(error => {
+                    console.error("Error sending message:", error);
+                });
         }
 
         // Remove roles
@@ -111,6 +115,10 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
             await Promise.all(commonRoleIds.map(roleId => member.roles.remove(roleId).catch(error => console.error("Error removing role: ", error))));
         } catch (error) {
             console.error('Error removing roles from user:', error);
+            await reaction.message.channel.send("❌**Error!**\nError removing roles from user. Make sure I have the right permissions and my role is above all other roles.")
+                .catch(error => {
+                    console.error("Error sending message:", error);
+                });
         }
     }
 
@@ -126,11 +134,9 @@ export async function onMessageReactionAdd(client: Client, reaction: MessageReac
             console.error('Error removing reaction:', error);
         }
         // Send message about error
-        try {
-            await reaction.message.channel.send("❌**Error!**\nFailed to add role. Make sure I have the right permissions and my role is above all other roles.");
-        }
-        catch (error) {
-            console.error("Error sending message:", error);
-        }
+        await reaction.message.channel.send("❌**Error!**\nFailed to add role. Make sure I have the right permissions and my role is above all other roles.")
+            .catch(error => {
+                console.error("Error sending message:", error);
+            });
     }
 }
