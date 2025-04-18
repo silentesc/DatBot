@@ -53,13 +53,13 @@ export async function onMessageReactionRemove(client: Client, reaction: MessageR
         return;
     }
 
-    const role = (!reaction.message.guild.roles.cache.get(roleId)) ? await reaction.message.guild.roles.fetch(roleId).catch(_ => {}) : reaction.message.guild.roles.cache.get(roleId);
+    const role = (!reaction.message.guild.roles.cache.get(roleId)) ? await reaction.message.guild.roles.fetch(roleId).catch(_ => { }) : reaction.message.guild.roles.cache.get(roleId);
     if (!role) {
         console.error(`Role id '${roleId}' is not found in guild`);
         return;
     }
 
-    const member = (!reaction.message.guild.members.cache.get(user.id)) ? await reaction.message.guild.members.fetch(user.id).catch(_ => {}) : reaction.message.guild.members.cache.get(user.id);
+    const member = (!reaction.message.guild.members.cache.get(user.id)) ? await reaction.message.guild.members.fetch(user.id).catch(_ => { }) : reaction.message.guild.members.cache.get(user.id);
     if (!member) {
         console.error(`Member with id '${user.id}' is not found in guild`);
         return;
@@ -69,5 +69,9 @@ export async function onMessageReactionRemove(client: Client, reaction: MessageR
         await member.roles.remove(role);
     } catch (error) {
         console.error('Error adding role to user:', error);
+        await reaction.message.channel.send("❌**Error!**\nFailed to remove role. Make sure I have the right permissions and my role is above all other roles.")
+            .catch(error => {
+                console.error("Error sending message:", error);
+            });
     }
 }
