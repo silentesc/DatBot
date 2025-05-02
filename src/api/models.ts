@@ -28,6 +28,13 @@ export interface WelcomeMessage {
 }
 
 
+export interface LeaveMessage {
+    guild: Guild;
+    channel: Channel;
+    message: string;
+}
+
+
 export interface Role {
     id: string;
     name: string;
