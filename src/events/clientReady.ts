@@ -16,16 +16,21 @@ async function handleReactionRoleDataSync(client: Client) {
             const channelId = entry["channel_id"]
             const messageId = entry["message_id"]
             const guild = await client.guilds.fetch(guildId);
-            const channel = await guild.channels.fetch(channelId);
+            const channel = await guild.channels.fetch(channelId).catch(_ => { });
             if (channel && channel.isTextBased()) {
-                const message = await channel.messages.fetch(messageId);
+                const message = await channel.messages.fetch(messageId).catch(_ => { });
+                if (!message) {
+                    console.warn(`Failed to fetch message with id ${messageId}, deleting reaction role from db...`);
+                    await axios.delete(`${process.env.BACKEND_URL}/reaction_role/reaction_role`, { params: { api_key: process.env.API_KEY, guild_id: guildId, channel_id: channelId, message_id: messageId } });
+                    continue;
+                }
                 await Promise.all(message.reactions.cache.map(r => r.users.fetch()));
+                reactionRoles.push(entry);
                 console.log("Fetched message and reaction with id", message.id);
             }
             else {
                 console.error("Channel is undefined or not text based");
             }
-            reactionRoles.push(entry);
         }
         console.log("Fetch complete for guild", guildId);
     }
