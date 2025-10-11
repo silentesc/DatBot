@@ -41,7 +41,7 @@ client.once("clientReady", async () => {
 });
 
 
-client.on("shardResume", (shardId) => {
+client.on("shardResume", (_) => {
     setActivity(client);
 });
 
