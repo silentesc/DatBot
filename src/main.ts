@@ -42,13 +42,7 @@ client.once("clientReady", async () => {
 
 
 client.on("shardResume", (shardId) => {
-    console.log(`Shard ${shardId} resumed.`);
     setActivity(client);
-});
-
-
-client.on("shardReconnecting", (shardId) => {
-    console.log(`Shard ${shardId} is reconnecting...`);
 });
 
 
