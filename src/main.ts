@@ -4,7 +4,7 @@ import "dotenv/config";
 
 import { onMessageReactionAdd } from "./events/messageReactionAdd";
 import { onMessageReactionRemove } from "./events/messageReactionRemove";
-import { onReady } from "./events/ready";
+import { onReady } from "./events/clientReady";
 import { setActivity } from "./utils/ActivityHandler";
 import { onGuildCreate } from "./events/guildCreate";
 import { onGuildDelete } from "./events/guildDelete";
