@@ -1,4 +1,4 @@
-import { Channel, Client, Collection, GuildBasedChannel, NonThreadGuildBasedChannel, ThreadChannel } from "discord.js";
+import { Client, Collection, NonThreadGuildBasedChannel, ThreadChannel } from "discord.js";
 import { Request, Response } from "express";
 
 

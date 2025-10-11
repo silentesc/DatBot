@@ -3,7 +3,7 @@ import { readFileSync } from "fs";
 
 
 module.exports = {
-    execute: async (client: Client, interaction: ChatInputCommandInteraction) => {
+    execute: async (_: Client, interaction: ChatInputCommandInteraction) => {
         const command = interaction.options.get("command")?.value;
         const responseEmbed = new EmbedBuilder();
         let helpPage;
