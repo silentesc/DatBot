@@ -5,7 +5,8 @@ import { Client } from "discord.js";
 import "dotenv/config";
 
 import { getChannels, getGuilds, getRoles } from "./services/guildService";
-import { createReactionRole, deleteReactionRole } from "./services/reactionRoleService";
+import { createReactionRole, deleteReactionRole } from "./services/reactionRolesService";
+import { canGiveRole, canReactInChannel, canSendMessagesInChannel } from "./services/permissionsService";
 
 const app = express();
 const port = 3001;
@@ -32,6 +33,22 @@ export function invokeApi(client: Client) {
 
     app.delete("/reaction_roles/:guildId/:channelId/:messageId", async (request: Request, response: Response) => {
         await deleteReactionRole(request, response, client);
+    });
+
+    app.get("/permissions/send_messages/:guildId/:channelId", async (request: Request, response: Response) => {
+        await canSendMessagesInChannel(request, response, client);
+    });
+
+    app.get("/permissions/give_role/:guildId/:roleId", async (request: Request, response: Response) => {
+        await canGiveRole(request, response, client);
+    });
+
+    app.get("/permissions/react/:guildId/:channelId", async (request: Request, response: Response) => {
+        await canReactInChannel(request, response, client);
+    });
+
+    app.get("/permissions/remove_others_reactions/:guildId/:channelId", async (request: Request, response: Response) => {
+        await canReactInChannel(request, response, client);
     });
 
     app.listen(port, () => {

@@ -6,7 +6,7 @@ export async function getGuilds(request: Request, response: Response, client: Cl
     const authHeader = request.headers.authorization;
 
     if (!authHeader || authHeader !== process.env.API_KEY) {
-        return response.status(403).json({ error: "Forbidden" }).send();
+        return response.status(403).json({ error: "Forbidden" })
     }
 
     const guilds = client.guilds.cache.map(guild => ({
@@ -15,7 +15,7 @@ export async function getGuilds(request: Request, response: Response, client: Cl
         icon: guild.icon,
     }));
 
-    response.status(200).json(guilds).send();
+    return response.status(200).json(guilds)
 }
 
 
@@ -23,14 +23,14 @@ export async function getChannels(request: Request, response: Response, client: 
     const authHeader = request.headers.authorization;
 
     if (!authHeader || authHeader !== process.env.API_KEY) {
-        return response.status(403).json({ error: "Forbidden" }).send();
+        return response.status(403).json({ error: "Forbidden" })
     }
 
     const guildId = request.params.guildId;
     const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId).catch(_ => { }) : client.guilds.cache.get(guildId);
 
     if (!guild) {
-        return response.status(404).json({ error: "Guild not found" }).send();
+        return response.status(404).json({ error: "Guild not found" })
     }
 
     let channelsCollection: Collection<string, NonThreadGuildBasedChannel>;
@@ -54,7 +54,7 @@ export async function getChannels(request: Request, response: Response, client: 
                 );
         } catch (error) {
             console.error(error);
-            return response.status(500).json({ error: "Failed to fetch channels" }).send();
+            return response.status(500).json({ error: "Failed to fetch channels" })
         }
     }
 
@@ -66,7 +66,7 @@ export async function getChannels(request: Request, response: Response, client: 
         position: channel.position,
     }));
 
-    response.status(200).json(channelData).send();
+    return response.status(200).json(channelData)
 }
 
 
@@ -74,14 +74,14 @@ export async function getRoles(request: Request, response: Response, client: Cli
     const authHeader = request.headers.authorization;
 
     if (!authHeader || authHeader !== process.env.API_KEY) {
-        return response.status(403).json({ error: "Forbidden" }).send();
+        return response.status(403).json({ error: "Forbidden" })
     }
 
     const guildId = request.params.guildId;
     const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId).catch(_ => { }) : client.guilds.cache.get(guildId);
 
     if (!guild) {
-        return response.status(404).json({ error: "Guild not found" }).send();
+        return response.status(404).json({ error: "Guild not found" })
     }
 
     let roles;
@@ -94,7 +94,7 @@ export async function getRoles(request: Request, response: Response, client: Cli
             roles = await guild.roles.fetch();
         } catch (error) {
             console.error(error);
-            return response.status(500).json({ error: "Failed to fetch roles" }).send();
+            return response.status(500).json({ error: "Failed to fetch roles" })
         }
     }
 
@@ -107,5 +107,5 @@ export async function getRoles(request: Request, response: Response, client: Cli
             managed: role.managed,
         }));
 
-    response.status(200).json(roleData).send();
+    return response.status(200).json(roleData)
 }
