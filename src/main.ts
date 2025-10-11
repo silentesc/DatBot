@@ -66,11 +66,17 @@ client.on("guildDelete", guild => {
 });
 
 client.on("guildMemberAdd", (member: GuildMember) => {
+    if (client.user && member.id == client.user.id) {
+        return;
+    }
     onGuildMemberAdd(member);
 });
 
 
 client.on("guildMemberRemove", (member: GuildMember | PartialGuildMember) => {
+    if (client.user && member.id == client.user.id) {
+        return;
+    }
     onGuildMemberRemove(member);
 });
 
