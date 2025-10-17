@@ -13,16 +13,16 @@
     "register": "node register_commands.js"
   },
   "dependencies": {
-    "axios": "^1.8.4",
-    "body-parser": "^1.20.3",
-    "discord.js": "^14.18.0",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2"
+    "axios": "^1.12.2",
+    "body-parser": "^2.2.0",
+    "discord.js": "^14.23.2",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.13.10",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.8.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "typescript": "^5.9.3"
   }
 }
