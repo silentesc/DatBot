@@ -23,5 +23,10 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Etc/UTC
+      - TOKEN=""
+      - CLIENT_ID=""
+      - GUILD_ID=""
+      - API_KEY=""
+      - BACKEND_URL=""
     restart: unless-stopped
 ```
