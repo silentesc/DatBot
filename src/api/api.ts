@@ -9,7 +9,7 @@ import { createReactionRole, deleteReactionRole } from "./services/reactionRoles
 import { canGiveRole, canReactInChannel, canSendMessagesInChannel } from "./services/permissionsService";
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT;
 
 app.use(bodyParser.json());
 app.use(express.json());
