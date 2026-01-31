@@ -26,7 +26,7 @@ export async function getChannels(request: Request, response: Response, client: 
         return response.status(403).json({ error: "Forbidden" })
     }
 
-    const guildId = request.params.guildId;
+    const guildId = request.params.guildId as string;
     const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId).catch(_ => { }) : client.guilds.cache.get(guildId);
 
     if (!guild) {
@@ -77,7 +77,7 @@ export async function getRoles(request: Request, response: Response, client: Cli
         return response.status(403).json({ error: "Forbidden" })
     }
 
-    const guildId = request.params.guildId;
+    const guildId = request.params.guildId as string;
     const guild = (!client.guilds.cache.get(guildId)) ? await client.guilds.fetch(guildId).catch(_ => { }) : client.guilds.cache.get(guildId);
 
     if (!guild) {
